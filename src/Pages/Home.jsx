@@ -60,10 +60,10 @@ export default function Home() {
         </div>
 
       <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0' }}>
-      <div style={{ flex: 1, height: '1px', backgroundColor: '#ccc' }}></div>
+      <div style={{ flex: 0.7, height: '1px', backgroundColor: '#ccc' }}></div>
       <span style={{ padding: '0 10px', color: '#666', fontWeight: 'bold' }}>OR</span>
-      <div style={{ flex: 1, height: '1px', backgroundColor: '#ccc' }}></div>
-    </div>
+      <div style={{ flex: 0.8, height: '1px', backgroundColor: '#ccc' }}></div>
+    </div> 
 
     <div>
         <h1 className="footer"> <Link style={{textDecoration:"none", color:"black"}} to="/signup">Sign up with email</Link></h1>  
