@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+}  
+
+ .chatbox-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.qa-icon {
+  width: 110px;
+  height: 110px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif;
+  font-size: 52px;
+  font-weight: 700;
+
+  color: #063d3b;
+
+  letter-spacing: -8px;
+}
+
+.qa-icon .q {
+  position: relative;
+  z-index: 2;
+}
+
+.qa-icon .a {
+  position: relative;
+  z-index: 1;
+  margin-left: -8px;
+}
+
+.chatbox-text {
+  margin-top: 50px; 
+  margin-left: 10px;
+
+  font-family: "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -1.5px;
+
+  color: #063d3b;
+}
+
+
+.QA {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #ffffff; 
+  color: #000000;
+}
+
+.home {
+  padding: 20px;
+}
