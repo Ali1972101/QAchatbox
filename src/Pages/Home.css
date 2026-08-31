@@ -165,6 +165,7 @@ body {
     text-align: center;
     width: 320px; 
     margin: 0 auto; 
+    margin-top: 10px;
 
     /* letter-spacing: -1.5px;  */
     color: white;
