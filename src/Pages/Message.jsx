@@ -13,9 +13,16 @@ import {
 
 export default function Message() {
   const [message, setMessage] = useState(true);
+  const [call, setCall] = useState(false);
 
   const messageMenu = () => {
     setMessage(!message);
+    if (!message) setCall(false);
+  };
+
+  const callMenu = () => {
+    setCall(!call);
+    if (!call) setMessage(false);
   };
 
   return (
@@ -80,7 +87,7 @@ export default function Message() {
         </div>
       </div>
 
-      {message && <div className="white-panel"></div>}
+      {(message || call) && <div className="white-panel"></div>}
 
       <div className="social-footer">
         <MessageCircleMore
@@ -88,7 +95,11 @@ export default function Message() {
           size={40}
           className={`message ${message ? "active" : ""}`}
         />
-        <PhoneForwarded size={30} />
+        <PhoneForwarded
+          onClick={callMenu}
+          size={30}
+          className={`message ${call ? "active" : ""}`}
+        />
         <CircleUser size={30} />
         <Settings size={30} />
       </div>
