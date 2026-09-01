@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Message.css";
 import {
   MessageSquare,
@@ -12,6 +12,12 @@ import {
 } from "lucide-react";
 
 export default function Message() {
+
+    const [message , setMessage] = useState(false);
+
+  const messageMenu = () => {
+    setMessage(!message);
+  };
   return (
     <section className="message-container">
       <div className="message-header">
@@ -45,7 +51,7 @@ export default function Message() {
       </div>
 
       <div className="social-footer">
-        <MessageCircleMore size={30} />
+        <MessageCircleMore onClick={messageMenu} size={30} className={`message ${message ? "active" : ""}`} />
         <PhoneForwarded size={30} />
         <CircleUser size={30} />
         <Settings size={30} />

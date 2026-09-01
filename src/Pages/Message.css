@@ -26,7 +26,22 @@
   justify-content: space-around;
   align-items: center;
   gap: 30px;
-  margin-top: auto;
+  margin-top: auto; 
   padding: 15px 0;
   border-top: 1px solid #222;
+border: 1px solid white;
+background-color: white;
+color: black;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
