@@ -67,7 +67,7 @@ export default function Home() {
 
     <div>
         <h1 className="footer"> <Link style={{textDecoration:"none", color:"black"}} to="/message">Sign up with email</Link></h1>  
-    </div>
+    </div> 
 
     <div>
         <h1 className="foot">Existing account? <Link style={{textDecoration:"none", color:"white"}} to="/login">Log in</Link></h1>

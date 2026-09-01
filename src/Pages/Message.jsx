@@ -1,13 +1,12 @@
 import React from "react";
 import "./Message.css";
 import {
-  MessageCircle,
+  MessageSquare,
   Search,
+  PhoneForwarded,
   Phone,
   Video,
   Settings,
-  User,
-  UserRound,
   CircleUser,
 } from "lucide-react";
 
@@ -15,36 +14,38 @@ export default function Message() {
   return (
     <section className="message-container">
       <div className="message-header">
-        <Search size={24} className="search-icon" color="black" />
+        <Search size={24} className="search-icon" color="white" />
         <h1>Home</h1>
         <div className="flex gap-4">
-          <User size={24} />
-          <UserRound size={24} />
-          <CircleUser size={24} />
+          <CircleUser size={30} />
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <div className="flex gap-4">
-          <User size={24} />
-          <UserRound size={24} />
-          <CircleUser size={24} />
+      <div style={{ display: "flex", gap: "50px", marginTop: "10px" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <CircleUser size={34} /> <p>status</p>
         </div>
-        <div className="flex gap-4">
-          <User size={24} />
-          <UserRound size={24} />
-          <CircleUser size={24} />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <CircleUser size={34} />
+          <p>ali</p>
         </div>
-        <div className="flex gap-4">
-          <User size={24} />
-          <UserRound size={24} />
-          <CircleUser size={24} />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <CircleUser size={34} />
+          <p>queen</p>
         </div>
-        <div className="flex gap-4">
-          <User size={24} />
-          <UserRound size={24} />
-          <CircleUser size={24} />
-        </div> 
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <CircleUser size={34} />
+          <p>victor</p>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <CircleUser size={34} />
+          <p>sam</p>
+        </div>
+      </div>
+
+      <div>
+        <MessageSquare size={30} />
+        <PhoneForwarded size={30} />
       </div>
     </section>
   );
