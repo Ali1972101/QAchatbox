@@ -14,15 +14,43 @@ import {
 export default function Message() {
   const [message, setMessage] = useState(true);
   const [call, setCall] = useState(false);
+  const [contact, setContact] = useState(false);
+  const [setting, setSetting] = useState(false);
 
   const messageMenu = () => {
     setMessage(!message);
-    if (!message) setCall(false);
+    if (!message) {
+      setCall(false);
+      setContact(false);
+      setSetting(false);
+    }
   };
 
   const callMenu = () => {
     setCall(!call);
-    if (!call) setMessage(false);
+    if (!call) {
+      setMessage(false);
+      setContact(false);
+      setSetting(false);
+    }
+  };
+
+  const contactMenu = () => {
+    setContact(!contact);
+    if (!contact) {
+      setMessage(false);
+      setCall(false);
+      setSetting(false);
+    }
+  };
+
+  const settingMenu = () => {
+    setSetting(!setting);
+    if (!setting) {
+      setMessage(false);
+      setCall(false);
+      setContact(false);
+    }
   };
 
   return (
@@ -35,7 +63,10 @@ export default function Message() {
         </div>
       </div>
 
-      <div className="people" style={{ display: "flex", gap: "50px", marginTop: "10px" }}>
+      <div
+        className="people"
+        style={{ display: "flex", gap: "50px", marginTop: "10px" }}
+      >
         <div
           style={{
             display: "flex",
@@ -87,21 +118,68 @@ export default function Message() {
         </div>
       </div>
 
-      {(message || call) && <div className="white-panel"></div>}
+      {(message || call || contact || setting) && (
+        <div className="white-panel"></div>
+      )}
 
       <div className="social-footer">
-        <MessageCircleMore
-          onClick={messageMenu}
-          size={40}
-          className={`message ${message ? "active" : ""}`}
-        />
-        <PhoneForwarded
-          onClick={callMenu}
-          size={30}
-          className={`message ${call ? "active" : ""}`}
-        />
-        <CircleUser size={30} />
-        <Settings size={30} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <MessageCircleMore
+            onClick={messageMenu}
+            size={30}
+            className={`message ${message ? "active" : ""}`}
+          />
+          <span>message</span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <PhoneForwarded
+            onClick={callMenu}
+            size={30}
+            className={`message ${call ? "active" : ""}`}
+          />
+          <span>Call</span>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <CircleUser
+            size={30}
+            onClick={contactMenu}
+            className={`contact ${contact ? "active" : ""}`}
+          />
+          <span>contacts</span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Settings
+            size={30}
+            onClick={settingMenu}
+            className={`setting ${setting ? "active" : ""}`}
+          />
+          <span>Settings</span>
+        </div>
       </div>
     </section>
   );
