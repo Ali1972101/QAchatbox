@@ -2,6 +2,7 @@ import React from "react";
 import "./Message.css";
 import {
   MessageSquare,
+  MessageCircleMore,
   Search,
   PhoneForwarded,
   Phone,
@@ -43,9 +44,11 @@ export default function Message() {
         </div>
       </div>
 
-      <div>
-        <MessageSquare size={30} />
+      <div className="social-footer">
+        <MessageCircleMore size={30} />
         <PhoneForwarded size={30} />
+        <CircleUser size={30} />
+        <Settings size={30} />
       </div>
     </section>
   );
