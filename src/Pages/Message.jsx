@@ -18,13 +18,6 @@ export default function Message() {
     setMessage(!message);
   };
 
-  const sampleMessages = [
-    { id: 1, name: "Ali", text: "Hey! Are we still meeting today?", time: "2 min ago" },
-    { id: 2, name: "Queen", text: "Sent you the project updates.", time: "15 min ago" },
-    { id: 3, name: "Victor", text: "Let's catch up later!", time: "1 hr ago" },
-    { id: 4, name: "Sam", text: "Great work on the design!", time: "3 hrs ago" },
-  ];
-
   return (
     <section className="message-container">
       <div className="message-header">
@@ -35,47 +28,64 @@ export default function Message() {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "30px", marginTop: "15px", overflowX: "auto" }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <CircleUser size={34} /> <p style={{ fontSize: "12px", marginTop: "4px" }}>Status</p>
+      <div className="people" style={{ display: "flex", gap: "50px", marginTop: "10px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <CircleUser size={34} /> <p>status</p>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <CircleUser size={34} />
-          <p style={{ fontSize: "12px", marginTop: "4px" }}>Ali</p>
+          <p>ali</p>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <CircleUser size={34} />
-          <p style={{ fontSize: "12px", marginTop: "4px" }}>Queen</p>
+          <p>queen</p>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <CircleUser size={34} />
-          <p style={{ fontSize: "12px", marginTop: "4px" }}>Victor</p>
+          <p>victor</p>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <CircleUser size={34} />
-          <p style={{ fontSize: "12px", marginTop: "4px" }}>Sam</p>
+          <p>sam</p>
         </div>
       </div>
 
-      {message && (
-        <div className="messages-list">
-          {sampleMessages.map((msg) => (
-            <div key={msg.id} className="message-item">
-              <CircleUser size={40} />
-              <div className="message-details">
-                <h3>{msg.name}</h3>
-                <p>{msg.text}</p>
-              </div>
-              <span className="message-time">{msg.time}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {message && <div className="white-panel"></div>}
 
       <div className="social-footer">
         <MessageCircleMore
           onClick={messageMenu}
-          size={30}
+          size={40}
           className={`message ${message ? "active" : ""}`}
         />
         <PhoneForwarded size={30} />
