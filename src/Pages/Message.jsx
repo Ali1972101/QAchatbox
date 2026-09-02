@@ -17,7 +17,7 @@ export default function Message() {
   const [contact, setContact] = useState(false);
   const [setting, setSetting] = useState(false);
 
-  const messageMenu = () => {
+  const messageMenu = () => { 
     setMessage(!message);
     if (!message) {
       setCall(false);
@@ -25,6 +25,7 @@ export default function Message() {
       setSetting(false);
     }
   };
+  
 
   const callMenu = () => {
     setCall(!call);
