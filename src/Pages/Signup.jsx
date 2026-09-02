@@ -27,7 +27,7 @@ export default function SignUp() {
   return (
     <div className="signup-container">
       <div className="header">
-        <button className="back-btn"><ArrowLeft size={24} /></button>
+        <button className="back-btn"><ArrowLeft onClick={() => window.history.back()} size={24} /></button>
       </div>
 
       <div className="title-section">
