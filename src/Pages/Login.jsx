@@ -22,6 +22,8 @@ export default function Login() {
     <div className="login-container">
       <div className="login-header">
         <button className="back-btn"><ArrowLeft size={24} /></button>
+      <div className="header">
+        <button className="back-btn"><ArrowLeft onClick={() => window.history.back()}   size={24} /></button>
       </div>
 
       <div className="title-section">
@@ -66,6 +68,7 @@ export default function Login() {
       </form>
 
       <div className="home-indicator"></div>
+    </div>
     </div>
   );
 }
