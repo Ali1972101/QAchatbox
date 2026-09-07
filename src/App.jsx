@@ -5,6 +5,8 @@ import Login from './Pages/Login';
 import Signup from './Pages/Signup';
 import Message from './Pages/Message';
 import Call from './Pages/Call';
+import Settings from "./Pages/Settings";
+import Contacts from "./Pages/Contacts";
 
 function App() {
 
@@ -17,6 +19,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/message" element={<Message />} />
           <Route path="/call" element={<Call />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/contact" element={<Contacts />} />
         </Routes>
       </BrowserRouter>
     </>

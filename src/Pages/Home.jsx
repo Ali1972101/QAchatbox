@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./Home.css";
 import facebook from "../assets/Images/facebook.png";
 import gmail from "../assets/Images/gmail.png";

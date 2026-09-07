@@ -26,7 +26,7 @@ export default function SignUp() {
 
   return (
     <div className="signup-container">
-      <div className="header">
+      <div className="signup-header">
         <button className="back-btn"><ArrowLeft size={24} /></button>
       </div>
 

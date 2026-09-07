@@ -20,7 +20,7 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      <div className="header">
+      <div className="login-header">
         <button className="back-btn"><ArrowLeft size={24} /></button>
       </div>
 
