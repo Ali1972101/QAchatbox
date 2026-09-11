@@ -35,7 +35,12 @@ export default function SignUp() {
     setLoading(true);
     const payload = { name, email, password };
 
-    const baseUrl = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000" : "");
+    const baseUrl =
+      import.meta.env.VITE_API_URL ||
+      (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+        ? "http://localhost:5000"
+        : "");
 
     try {
       const response = await fetch(`${baseUrl}/api/auth/signup`, {
@@ -47,19 +52,25 @@ export default function SignUp() {
       const resinfo = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        setMessage({ type: "success", text: "Signup successful! Redirecting to login..." });
+        setMessage({
+          type: "success",
+          text: "Signup successful! Redirecting to login...",
+        });
         if (resinfo.token && auth?.login) {
           auth.login(resinfo.token, resinfo.user);
         }
         setTimeout(() => navigate("/login"), 1000);
       } else {
-        setMessage({ type: "error", text: resinfo?.message || "Signup failed" });
+        setMessage({
+          type: "error",
+          text: resinfo?.message || "Signup failed",
+        });
       }
     } catch (err) {
       console.error("Signup network error:", err);
       setMessage({
         type: "error",
-        text: `Network error — cannot connect to backend at ${baseUrl}. Ensure backend server is running.`,
+        text: "Network error — please check backend connection.",
       });
     } finally {
       setLoading(false);
@@ -69,7 +80,12 @@ export default function SignUp() {
   return (
     <div className="signup-container">
       <div className="header">
-        <button type="button" className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+        <button
+          type="button"
+          className="back-btn"
+          onClick={() => navigate(-1)}
+          aria-label="Go back"
+        >
           <ArrowLeft size={24} />
         </button>
       </div>
@@ -78,12 +94,19 @@ export default function SignUp() {
         <h1>
           Sign up with <span className="underline-email">Email</span>
         </h1>
-        <p>Get chatting with friends and family today by signing up for our chat app!</p>
+        <p>
+          Get chatting with friends and family today by signing up for our chat
+          app!
+        </p>
       </div>
 
       {message && (
-        <div className={`auth-alert alert-${message.type}`}>
-          {message.text}
+        <div
+          className={`auth-alert alert-${
+            typeof message === "object" ? message.type : "error"
+          }`}
+        >
+          {typeof message === "object" ? message.text : message}
         </div>
       )}
 
@@ -93,7 +116,6 @@ export default function SignUp() {
           <input
             type="text"
             name="name"
-            
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -105,7 +127,6 @@ export default function SignUp() {
           <input
             type="email"
             name="email"
-            
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -118,7 +139,6 @@ export default function SignUp() {
             <input
               type={showPassword ? "text" : "password"}
               name="password"
-            
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -140,7 +160,6 @@ export default function SignUp() {
             <input
               type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
-            
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -149,7 +168,11 @@ export default function SignUp() {
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="eye-btn"
-              aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+              aria-label={
+                showConfirmPassword
+                  ? "Hide confirm password"
+                  : "Show confirm password"
+              }
             >
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -159,7 +182,11 @@ export default function SignUp() {
           )}
         </div>
 
-        <button type="submit" disabled={!isFormValid || loading} className="submit-btn">
+        <button
+          type="submit"
+          disabled={!isFormValid || loading}
+          className="submit-btn"
+        >
           {loading ? "Creating account..." : "Create an account"}
         </button>
 

@@ -25,7 +25,12 @@ const Login = () => {
     setLoading(true);
     const payload = { email, password };
 
-    const baseUrl = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000" : "");
+    const baseUrl =
+      import.meta.env.VITE_API_URL ||
+      (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+        ? "http://localhost:5000"
+        : "");
 
     try {
       const res = await fetch(`${baseUrl}/api/auth/login`, {
@@ -54,7 +59,7 @@ const Login = () => {
       console.error("Login error:", err);
       setMessage({
         type: "error",
-        text: `Network error — cannot connect to backend at ${baseUrl}. Ensure backend server is running.`,
+        text: `Network error — cannot connect to backend.`,
       });
     } finally {
       setLoading(false);
@@ -64,7 +69,12 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="header">
-        <button type="button" className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+        <button
+          type="button"
+          className="back-btn"
+          onClick={() => navigate(-1)}
+          aria-label="Go back"
+        >
           <ArrowLeft size={24} />
         </button>
       </div>
@@ -73,17 +83,31 @@ const Login = () => {
         <h1>
           <span className="underline-login">Log in</span> to Chatbox
         </h1>
-        <p>Welcome back! Sign in using your social account or email to continue</p>
+        <p>
+          Welcome back! Sign in using your social account or email to continue
+        </p>
       </div>
 
       <div className="social-buttons">
-        <button type="button" className="social-btn" aria-label="Sign in with Facebook">
+        <button
+          type="button"
+          className="social-btn"
+          aria-label="Sign in with Facebook"
+        >
           <FaFacebook size={24} color="#1877F2" />
         </button>
-        <button type="button" className="social-btn" aria-label="Sign in with Google">
+        <button
+          type="button"
+          className="social-btn"
+          aria-label="Sign in with Google"
+        >
           <FaGoogle size={22} />
         </button>
-        <button type="button" className="social-btn" aria-label="Sign in with Apple">
+        <button
+          type="button"
+          className="social-btn"
+          aria-label="Sign in with Apple"
+        >
           <FaApple size={24} color="#000" />
         </button>
       </div>
@@ -93,8 +117,12 @@ const Login = () => {
       </div>
 
       {message && (
-        <div className={`auth-alert alert-${message.type}`}>
-          {message.text}
+        <div
+          className={`auth-alert alert-${
+            typeof message === "object" ? message.type : "error"
+          }`}
+        >
+          {typeof message === "object" ? message.text : message}
         </div>
       )}
 
@@ -104,7 +132,6 @@ const Login = () => {
           <input
             type="email"
             name="email"
-            
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -117,7 +144,6 @@ const Login = () => {
             <input
               type={showPassword ? "text" : "password"}
               name="password"
-              
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -133,7 +159,11 @@ const Login = () => {
           </div>
         </div>
 
-        <button type="submit" disabled={!isFormValid || loading} className="submit-btn">
+        <button
+          type="submit"
+          disabled={!isFormValid || loading}
+          className="submit-btn"
+        >
           {loading ? "Logging in..." : "Log in"}
         </button>
 
