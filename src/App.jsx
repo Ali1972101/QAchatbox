@@ -7,6 +7,7 @@ import Message from './Pages/Message';
 import Call from './Pages/Call';
 import Settings from "./Pages/Settings";
 import Contacts from "./Pages/Contacts";
+import Profile from "./Pages/Profile";
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/call" element={<Call />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/contact" element={<Contacts />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </BrowserRouter>
     </>

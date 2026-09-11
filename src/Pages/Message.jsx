@@ -43,6 +43,7 @@ export default function Message() {
       setCall(false);
       setSetting(false);
     }
+     
   };
 
   const settingMenu = () => {
