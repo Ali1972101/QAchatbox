@@ -18,11 +18,10 @@ export default function SignUp() {
   const auth = useAuth();
 
   const passwordsMatch = password === confirmPassword;
-  const isFormValid =
-    name.trim().length > 0 &&
-    email.trim().length > 0 &&
-    password.length >= 6 &&
-    passwordsMatch;
+  const isNameValid = name.trim().length >= 3;
+  const isEmailValid = /\S+@\S+\.\S+/.test(email.trim());
+  const isPasswordValid = password.length >= 6;
+  const isFormValid = isNameValid && isEmailValid && isPasswordValid && passwordsMatch;
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -33,14 +32,10 @@ export default function SignUp() {
 
     setMessage(null);
     setLoading(true);
-    const payload = { name, email, password };
+    const payload = { name: name.trim(), email: email.trim().toLowerCase(), password };
 
-    const baseUrl =
-      import.meta.env.VITE_API_URL ||
-      (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-        ? "http://localhost:5000"
-        : "");
+    
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
     try {
       const response = await fetch(`${baseUrl}/api/auth/signup`, {
@@ -52,18 +47,19 @@ export default function SignUp() {
       const resinfo = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        setMessage({
-          type: "success",
-          text: "Signup successful! Redirecting to login...",
-        });
-        if (resinfo.token && auth?.login) {
+        setMessage({ type: "success", text: "Signup successful! Redirecting..." });
+        
+        if (resinfo.token && typeof auth?.login === "function") {
           auth.login(resinfo.token, resinfo.user);
+          setTimeout(() => navigate("/message"), 800);
+        } else {
+          setTimeout(() => navigate("/login"), 800); 
         }
-        setTimeout(() => navigate("/login"), 1000);
       } else {
+        console.warn("Signup failed", response.status, resinfo);
         setMessage({
           type: "error",
-          text: resinfo?.message || "Signup failed",
+          text: resinfo?.message || `Signup failed (status ${response.status})`,
         });
       }
     } catch (err) {
