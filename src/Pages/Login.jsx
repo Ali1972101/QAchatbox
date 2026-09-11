@@ -25,7 +25,7 @@ const Login = () => {
     setLoading(true);
     const payload = { email, password };
 
-    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const baseUrl = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000" : "");
 
     try {
       const res = await fetch(`${baseUrl}/api/auth/login`, {
