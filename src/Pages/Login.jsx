@@ -15,31 +15,24 @@ const Login = () => {
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const isFormValid = email.trim().length > 0 && password.length >= 1;
+  const isFormValid = email.trim().length > 0 && password.length > 0;
 
   const handleSignin = async (e) => {
     e.preventDefault();
+    if (!isFormValid) return;
+
     setMessage(null);
     setLoading(true);
-
     const payload = { email, password };
+
     const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
     try {
-      let res;
-      try {
-        res = await fetch(`${baseUrl}/api/auth/Login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } catch (firstErr) {
-        res = await fetch("https://q-achatbox.vercel.app/api/auth/Login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      }
+      const res = await fetch(`${baseUrl}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const data = await res.json().catch(() => ({}));
 
@@ -55,11 +48,14 @@ const Login = () => {
           navigate("/message");
         }, 800);
       } else {
-        setMessage({ type: "error", text: data?.message || "Login failed. Check your email or password." });
+        setMessage({ type: "error", text: data?.message || "Signin failed" });
       }
     } catch (err) {
       console.error("Login error:", err);
-      setMessage({ type: "error", text: "Network error " });
+      setMessage({
+        type: "error",
+        text: `Network error — cannot connect to backend at ${baseUrl}. Ensure backend server is running.`,
+      });
     } finally {
       setLoading(false);
     }

@@ -38,20 +38,11 @@ export default function SignUp() {
     const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
     try {
-      let response;
-      try {
-        response = await fetch(`${baseUrl}/api/auth/Signup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } catch (firstErr) {
-        response = await fetch("https://q-achatbox.vercel.app/api/auth/Signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      }
+      const response = await fetch(`${baseUrl}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const resinfo = await response.json().catch(() => ({}));
 
@@ -66,7 +57,10 @@ export default function SignUp() {
       }
     } catch (err) {
       console.error("Signup network error:", err);
-      setMessage({ type: "error", text: "Network error — please check backend connection." });
+      setMessage({
+        type: "error",
+        text: `Network error — cannot connect to backend at ${baseUrl}. Ensure backend server is running.`,
+      });
     } finally {
       setLoading(false);
     }
