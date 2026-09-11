@@ -55,11 +55,11 @@ const Login = () => {
           navigate("/message");
         }, 800);
       } else {
-        setMessage({ type: "error", text: data?.message || "Signin failed. Check your email or password." });
+        setMessage({ type: "error", text: data?.message || "Login failed. Check your email or password." });
       }
     } catch (err) {
       console.error("Login error:", err);
-      setMessage({ type: "error", text: "Network error — please check backend server." });
+      setMessage({ type: "error", text: "Network error " });
     } finally {
       setLoading(false);
     }
