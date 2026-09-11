@@ -1,48 +1,118 @@
 import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { FaFacebook, FaGoogle, FaApple } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.jsx";
 import "./Login.css";
 
-export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const navigate = useNavigate();
+  const auth = useAuth();
 
-  const handleSubmit = (e) => {
+  const isFormValid = email.trim().length > 0 && password.length >= 1;
+
+  const handleSignin = async (e) => {
     e.preventDefault();
-    console.log("Login submitted:", form);
-  };
+    setMessage(null);
+    setLoading(true);
 
-  const isFormValid = form.email && form.password;
+    const payload = { email, password };
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+    try {
+      let res;
+      try {
+        res = await fetch(`${baseUrl}/api/auth/Login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (firstErr) {
+        res = await fetch("https://q-achatbox.vercel.app/api/auth/Login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        setMessage({ type: "success", text: "Login successful! Redirecting..." });
+        if (auth && typeof auth.login === "function") {
+          auth.login(data.token, data.user || null);
+        } else {
+          if (data.token) localStorage.setItem("token", data.token);
+          if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+        }
+        setTimeout(() => {
+          navigate("/message");
+        }, 800);
+      } else {
+        setMessage({ type: "error", text: data?.message || "Signin failed. Check your email or password." });
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setMessage({ type: "error", text: "Network error — please check backend server." });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-container">
-      <div className="login-header">
-        <button className="back-btn"><ArrowLeft size={24} /></button>
       <div className="header">
-        <button className="back-btn"><ArrowLeft onClick={() => window.history.back()}   size={24} /></button>
+        <button type="button" className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+          <ArrowLeft size={24} />
+        </button>
       </div>
 
       <div className="title-section">
-        <h1><span className="underline-login">Log in</span> to Chatbox</h1>
-        <p>Welcome back! Sign in using your social account or email to continue us</p>
+        <h1>
+          <span className="underline-login">Log in</span> to Chatbox
+        </h1>
+        <p>Welcome back! Sign in using your social account or email to continue</p>
       </div>
 
       <div className="social-buttons">
-        <button className="social-btn"><FaFacebook size={24} color="#1877F2" /></button>
-        <button className="social-btn"><FaGoogle size={22} /></button>
-        <button className="social-btn"><FaApple size={24} color="#000" /></button>
+        <button type="button" className="social-btn" aria-label="Sign in with Facebook">
+          <FaFacebook size={24} color="#1877F2" />
+        </button>
+        <button type="button" className="social-btn" aria-label="Sign in with Google">
+          <FaGoogle size={22} />
+        </button>
+        <button type="button" className="social-btn" aria-label="Sign in with Apple">
+          <FaApple size={24} color="#000" />
+        </button>
       </div>
 
-      <div className="divider"><span>OR</span></div>
+      <div className="divider">
+        <span>OR</span>
+      </div>
 
-      <form onSubmit={handleSubmit} className="login-form">
+      {message && (
+        <div className={`auth-alert alert-${message.type}`}>
+          {message.text}
+        </div>
+      )}
+
+      <form onSubmit={handleSignin} className="login-form">
         <div className="input-group">
           <label>Your email</label>
-          <input type="email" name="email" value={form.email} onChange={handleChange} />
+          <input
+            type="email"
+            name="email"
+            
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
 
         <div className="input-group">
@@ -51,24 +121,38 @@ export default function Login() {
             <input
               type={showPassword ? "text" : "password"}
               name="password"
-              value={form.password}
-              onChange={handleChange}
+              
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="eye-btn">
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="eye-btn"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
         </div>
 
-        <button type="submit" disabled={!isFormValid} className="submit-btn">
-          Log in
+        <button type="submit" disabled={!isFormValid || loading} className="submit-btn">
+          {loading ? "Logging in..." : "Log in"}
         </button>
 
-        <button type="button" className="forgot-link">Forgot password?</button>
+        <button type="button" className="forgot-link">
+          Forgot password?
+        </button>
+
+        <div className="auth-footer-link">
+          Don't have an account? <Link to="/signup">Sign up</Link>
+        </div>
       </form>
 
       <div className="home-indicator"></div>
     </div>
-    </div>
   );
-}
+};
+
+export default Login;

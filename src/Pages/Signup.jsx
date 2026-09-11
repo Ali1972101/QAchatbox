@@ -1,38 +1,83 @@
 import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.jsx";
 import "./Signup.css";
 
 export default function SignUp() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const navigate = useNavigate();
+  const auth = useAuth();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", form);
-  };
-
+  const passwordsMatch = password === confirmPassword;
   const isFormValid =
-    form.name && form.email && form.password && form.password === form.confirmPassword;
+    name.trim().length > 0 &&
+    email.trim().length > 0 &&
+    password.length >= 6 &&
+    passwordsMatch;
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    if (!passwordsMatch) {
+      setMessage({ type: "error", text: "Passwords do not match." });
+      return;
+    }
+
+    setMessage(null);
+    setLoading(true);
+    const payload = { name, email, password };
+
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+    try {
+      let response;
+      try {
+        response = await fetch(`${baseUrl}/api/auth/Signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (firstErr) {
+        response = await fetch("https://q-achatbox.vercel.app/api/auth/Signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      const resinfo = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        setMessage({ type: "success", text: "Signup successful! Redirecting to login..." });
+        if (resinfo.token && auth?.login) {
+          auth.login(resinfo.token, resinfo.user);
+        }
+        setTimeout(() => navigate("/login"), 1000);
+      } else {
+        setMessage({ type: "error", text: resinfo?.message || "Signup failed" });
+      }
+    } catch (err) {
+      console.error("Signup network error:", err);
+      setMessage({ type: "error", text: "Network error — please check backend connection." });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="signup-container">
-
-      <div className="signup-header">
-        <button className="back-btn"><ArrowLeft size={24} /></button>
-
       <div className="header">
-        <button className="back-btn"><ArrowLeft onClick={() => window.history.back()} size={24} /></button>
- 
+        <button type="button" className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+          <ArrowLeft size={24} />
+        </button>
       </div>
 
       <div className="title-section">
@@ -42,15 +87,35 @@ export default function SignUp() {
         <p>Get chatting with friends and family today by signing up for our chat app!</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="signup-form">
+      {message && (
+        <div className={`auth-alert alert-${message.type}`}>
+          {message.text}
+        </div>
+      )}
+
+      <form onSubmit={handleSignup} className="signup-form">
         <div className="input-group">
           <label>Your name</label>
-          <input type="text" name="name" value={form.name} onChange={handleChange} />
+          <input
+            type="text"
+            name="name"
+            
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
 
         <div className="input-group">
           <label>Your email</label>
-          <input type="email" name="email" value={form.email} onChange={handleChange} />
+          <input
+            type="email"
+            name="email"
+            
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
 
         <div className="input-group">
@@ -59,10 +124,17 @@ export default function SignUp() {
             <input
               type={showPassword ? "text" : "password"}
               name="password"
-              value={form.password}
-              onChange={handleChange}
+            
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="eye-btn">
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="eye-btn"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
@@ -74,22 +146,35 @@ export default function SignUp() {
             <input
               type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
-              value={form.confirmPassword}
-              onChange={handleChange}
+            
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
             />
-            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="eye-btn">
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="eye-btn"
+              aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+            >
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
+          {confirmPassword && !passwordsMatch && (
+            <span className="error-hint">Passwords do not match</span>
+          )}
         </div>
 
-        <button type="submit" disabled={!isFormValid} className="submit-btn">
-          Create an account
+        <button type="submit" disabled={!isFormValid || loading} className="submit-btn">
+          {loading ? "Creating account..." : "Create an account"}
         </button>
+
+        <div className="auth-footer-link">
+          Already have an account? <Link to="/login">Log in</Link>
+        </div>
       </form>
 
       <div className="home-indicator"></div>
-    </div>
     </div>
   );
 }
