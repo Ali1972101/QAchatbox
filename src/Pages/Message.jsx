@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./Message.css";
 import BottomNav from "../Components/BottomNav";
-import {
-  Search,
-  Plus,
-  Wifi,
-  Battery,
-  Signal,
-} from "lucide-react";
+import { Search, Plus } from "lucide-react";
+import { useAuth } from '../../hooks/useAuth.jsx';
+import { createSocket } from '../lib/socket';
+import blank from "../assets/Images/blank.png";
+import { useLocation } from 'react-router-dom';
+
 
 
 export default function Message() {
@@ -15,38 +14,23 @@ export default function Message() {
   const [call, setCall] = useState(false);
   const [contact, setContact] = useState(false);
   const [setting, setSetting] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const socketRef = useRef(null);
+  const { token, user, setUser } = useAuth();
+  const location = useLocation();
+  const makeUrl = (p) => (p && p.startsWith('/') ? `http://localhost:5000${p}` : p || null);
+  const statusFileRef = useRef(null);
 
   const storiesData = [
     {
       id: "my-status",
-      name: "My status",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+      name: user?.name || "My status",
+      avatar: user?.imageUrl ? `http://localhost:5000${user.imageUrl}` : blank,
       borderColor: "white-ring",
       isMyStatus: true,
-    },
-    {
-      id: "adil",
-      name: "Adil",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
-      borderColor: "yellow-ring",
-    },
-    {
-      id: "marina",
-      name: "Marina",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
-      borderColor: "pink-ring",
-    },
-    {
-      id: "dean",
-      name: "Dean",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80",
-      borderColor: "blue-ring",
-    },
-    {
-      id: "max",
-      name: "Max",
-      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80",
-      borderColor: "yellow-ring",
     },
   ];
 
@@ -86,111 +70,105 @@ export default function Message() {
     }
   };
 
-  const chatList = [
-    {
-      id: 1,
-      name: "Alex Linderson",
-      message: "How are you today?",
-      time: "2 min ago",
-      unread: 3,
-      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80",
-      status: "online",
-      isGroup: false,
-    },
-    {
-      id: 2,
-      name: "Team Align",
-      message: "Don't miss to attend the meeting.",
-      time: "2 min ago",
-      unread: 4,
-      groupAvatars: [
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80",
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80",
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=80&q=80",
-      ],
-      status: "online",
-      isGroup: true,
-    },
-    {
-      id: 3,
-      name: "John Ahraham",
-      message: "Hey! Can you join the meeting?",
-      time: "2 min ago",
-      unread: 0,
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80",
-      status: "none",
-      isGroup: false,
-    },
-    {
-      id: 4,
-      name: "Sabila Sayma",
-      message: "How are you today?",
-      time: "2 min ago",
-      unread: 0,
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
-      status: "offline",
-      isGroup: false,
-    },
-    {
-      id: 5,
-      name: "John Borino",
-      message: "Have a good day 🌸",
-      time: "2 min ago",
-      unread: 0,
-      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80",
-      status: "online",
-      isGroup: false,
-    },
-    {
-      id: 6,
-      name: "Angel Ram",
-      message: "How are you today?",
-      time: "2 min ago",
-      unread: 0,
-      avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80",
-      status: "none",
-      isGroup: false,
-    },
-  ];
+
+
+  useEffect(()=>{
+    const t = token || localStorage.getItem('token');
+    if (!t) return;
+    const s = createSocket(t);
+    socketRef.current = s;
+    s.on('connect', ()=> console.log('connected'));
+    s.on('private_message', (msg)=>{
+      // if message belongs to current conversation, append
+      setMessages((prev)=>[...prev, msg]);
+    });
+    return ()=>{
+      // do not disconnect globally to avoid affecting other pages
+    }
+  },[token]);
+
+  // if navigated with user in location.state, open chat
+  useEffect(()=>{
+    const u = location?.state?.user;
+    if (u) {
+      // ensure user object has _id
+      openChat(u);
+    }
+  },[location]);
+
+  const openChat = async (u) => {
+    setSelectedUser(u);
+    // load messages
+    try {
+      const t = token || localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5000/api/message/${u._id}`, { headers: { Authorization: `Bearer ${t}` } });
+      const data = await res.json();
+      setMessages(data || []);
+    } catch (err) {
+      console.error('Load messages error', err);
+    }
+  }
+
+  const sendMessage = async ()=>{
+    if (!input.trim() || !selectedUser) return;
+    const payload = { to: selectedUser._id, content: input };
+    // emit socket message
+    socketRef.current?.emit('private_message', payload);
+    setInput('');
+  }
 
   return (
     <div className="mobile-screen-wrapper">
       <div className="message-container">
-        {/* Status Bar */}
-        <div className="status-bar">
-          <span className="status-time">9:41</span>
-          <div className="status-icons">
-            <Signal size={15} />
-            <Wifi size={15} />
-            <Battery size={18} />
-          </div>
-        </div>
+        
+        
 
-        {/* App Header */}
+        
         <header className="message-header">
           <button className="search-btn" aria-label="Search">
             <Search size={18} color="white" />
           </button>
           <h1 className="header-title">Home</h1>
           <div className="user-profile-avatar">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+            <img style={{borderRadius:"100%", border:"2px solid white"}}
+              src={ user?.imageUrl ? makeUrl(user.imageUrl) : blank }
               alt="User profile"
             />
           </div>
         </header>
 
         {/* Stories / Status Row */}
-        <div className="stories-section">
+          <div className="stories-section">
           <div className="stories-scroll">
-            {storiesData.map((item) => (
-              <div className="story-item" key={item.id}>
+            {storiesData.map((item, idx) => (
+              <div className="story-item" key={item.id || item.name || idx}>
                 <div className={`story-avatar-ring ${item.borderColor}`}>
                   <img src={item.avatar} alt={item.name} className="story-img" />
                   {item.isMyStatus && (
-                    <div className="add-status-badge">
+                    <div className="add-status-badge" onClick={() => statusFileRef.current && statusFileRef.current.click()}>
                       <Plus size={11} color="black" strokeWidth={3} />
+                      <input ref={statusFileRef} type="file" accept="image/*" style={{display:'none'}} onChange={async (e)=>{
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const form = new FormData();
+                        form.append('statusImage', file);
+                        form.append('statusText', '');
+                        try {
+                          const res = await fetch('http://localhost:5000/api/users/upload-status', {
+                            method: 'POST',
+                            headers: { Authorization: `Bearer ${token || localStorage.getItem('token')}` },
+                            body: form,
+                          });
+                          const data = await res.json();
+                          if (res.ok) {
+                            setUser(data.user);
+                          } else {
+                            console.warn('Status upload failed', data);
+                          }
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }} />
                     </div>
                   )}
                 </div>
@@ -205,41 +183,37 @@ export default function Message() {
           <div className="drawer-handle-bar"></div>
 
           <div className="chat-list">
-            {chatList.map((chat) => (
-              <div className="chat-item" key={chat.id}>
+            {users.length === 0 && <p className="muted">No messages. Use the Contacts tab to search users.</p>}
+            {users.map((u, idx) => (
+              <div key={u._id || u.email || idx} className="chat-item" onClick={() => openChat(u)}>
                 <div className="chat-avatar-container">
-                  {chat.isGroup ? (
-                    <div className="group-avatar-grid">
-                      {chat.groupAvatars.map((imgUrl, idx) => (
-                        <img key={idx} src={imgUrl} alt="Group member" />
-                      ))}
-                    </div>
-                  ) : (
-                    <img src={chat.avatar} alt={chat.name} className="single-avatar" />
-                  )}
-
-                  {chat.status === "online" && (
-                    <span className="status-dot online"></span>
-                  )}
-                  {chat.status === "offline" && (
-                    <span className="status-dot offline"></span>
-                  )}
+                  <img src={makeUrl(u.imageUrl) || blank} alt={u.name} className="single-avatar" />
                 </div>
-
                 <div className="chat-info">
-                  <h3 className="chat-name">{chat.name}</h3>
-                  <p className="chat-preview">{chat.message}</p>
-                </div>
-
-                <div className="chat-meta">
-                  <span className="chat-time">{chat.time}</span>
-                  {chat.unread > 0 && (
-                    <span className="unread-badge">{chat.unread}</span>
-                  )}
+                  <h3 className="chat-name">{u.name}</h3>
+                  <p className="chat-preview">{u.statusText}</p>
                 </div>
               </div>
             ))}
           </div>
+
+          {selectedUser && (
+            <div className="chat-window">
+              <h3>Chat with {selectedUser.name}</h3>
+              <div className="messages-list">
+                {messages.map((m, idx)=> (
+                  <div key={(m._id) ? m._id : `msg-${m.sender || 'unknown'}-${idx}`} className={`message ${m.sender === user?.id || m.sender === user?._id ? 'outgoing' : 'incoming'}`}>
+                    <p>{m.message}</p>
+                    {m.mediaUrl && <img src={`http://localhost:5000${m.mediaUrl}`} alt="media" style={{maxWidth:200}} />}
+                  </div>
+                ))}
+              </div>
+              <div className="message-input">
+                <input value={input} onChange={(e)=>setInput(e.target.value)} placeholder="Type a message" />
+                <button onClick={sendMessage}>Send</button>
+              </div>
+            </div>
+          )}
         </main>
 
         <BottomNav activeTab="message" />

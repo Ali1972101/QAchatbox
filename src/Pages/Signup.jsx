@@ -66,7 +66,7 @@ export default function SignUp() {
       console.error("Signup network error:", err);
       setMessage({
         type: "error",
-        text: "Network error — please check backend connection.",
+        text: "Network error",
       });
     } finally {
       setLoading(false);

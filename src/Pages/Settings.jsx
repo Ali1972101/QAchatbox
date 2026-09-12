@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -9,12 +9,15 @@ import {
   ArrowUpDown,
   Users,
   QrCode,
+  Plus,
   Wifi,
   Battery,
   Signal,
 } from "lucide-react";
 import "./Settings.css";
 import BottomNav from "../Components/BottomNav";
+import { useAuth } from "../../hooks/useAuth.jsx";
+import blank from "../assets/Images/blank.png";
 
 const menuItems = [
   {
@@ -47,21 +50,59 @@ const menuItems = [
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { user, token, setUser } = useAuth();
+  const fileRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLoading(true);
+    try {
+      const form = new FormData();
+      form.append('image', file);
+      form.append('avatar', file);
+      const authToken = token || localStorage.getItem('token');
+      if (!authToken) {
+        console.warn('No auth token available for image upload');
+        setLoading(false);
+        return;
+      }
+
+      // try the new endpoint first
+      let res = await fetch('http://localhost:5000/api/users/upload-image', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: form,
+      });
+      let data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        // fallback to legacy endpoint
+        res = await fetch('http://localhost:5000/api/users/upload-avatar', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${authToken}` },
+          body: form,
+        });
+        data = await res.json().catch(() => ({}));
+      }
+
+      if (res.ok) {
+        setUser(data.user);
+      } else {
+        console.warn('Image upload failed', data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally { setLoading(false); }
+  };
 
   return (
     <div className="mobile-screen-wrapper">
       <div className="settings-page-container">
-        {/* Status Bar */}
-        <div className="status-bar">
-          <span className="status-time">9:41</span>
-          <div className="status-icons">
-            <Signal size={15} />
-            <Wifi size={15} />
-            <Battery size={18} />
-          </div>
-        </div>
+        
 
-        {/* Top Header */}
+      
         <div className="top-header">
           <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
             <ArrowLeft size={22} color="white" />
@@ -69,27 +110,35 @@ export default function Settings() {
           <h1 className="header-title">Settings</h1>
         </div>
 
-        {/* White Drawer Card */}
+     
         <div className="settings-card">
           <div className="drawer-handle-bar"></div>
 
-          {/* Profile Section */}
+        
           <div className="profile-section">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
-              alt="profile"
-              className="profile-img"
-            />
-            <div className="profile-info">
-              <h2>Nazrul Islam</h2>
-              <p>Never give up 🙌</p>
+            <div className="profile-img-wrapper">
+              <img
+                src={user?.imageUrl ? `http://localhost:5000${user.imageUrl}` : blank}
+                alt="profile"
+                className="profile-img"
+              />
+              <button className="add-image-badge" aria-label="Add image" onClick={() => fileRef.current && fileRef.current.click()}>
+                <Plus size={14} color="#24786D" />
+              </button>
             </div>
-            <button className="qr-btn" aria-label="QR Code">
-              <QrCode size={22} color="#24786D" />
-            </button>
+            <div className="profile-info">
+              <h2>{user?.name || 'Your name'}</h2>
+              <p>{user?.statusText || ''}</p>
+            </div>
+            <div>
+              <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleFileChange} />
+              <button className="qr-btn" aria-label="Upload image" onClick={() => fileRef.current && fileRef.current.click()}>
+                {loading ? 'Uploading...' : <QrCode size={22} color="#24786D" />}
+              </button>
+            </div>
           </div>
 
-          {/* Menu List */}
+          
           <div className="menu-list">
             {menuItems.map((item, i) => (
               <button key={i} className="menu-item">
@@ -103,7 +152,7 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Bottom Nav */}
+        
         <BottomNav activeTab="settings" />
       </div>
     </div>
