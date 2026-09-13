@@ -135,6 +135,7 @@ export default function SignUp() {
             <input
               type={showPassword ? "text" : "password"}
               name="password"
+              placeholder="must be up to 6 digits"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -156,6 +157,7 @@ export default function SignUp() {
             <input
               type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
+              placeholder="Confirm your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
