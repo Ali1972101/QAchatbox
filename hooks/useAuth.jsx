@@ -29,6 +29,11 @@ const AuthProvider = ({children}) => {
             setUser(null);
             localStorage.removeItem("user");
         }
+        // Clear any cached chat state so a newly signed-in user starts fresh
+        try {
+            sessionStorage.removeItem('chat_selectedUser_v1');
+            sessionStorage.removeItem('chat_messages_v1');
+        } catch (e) {}
     };
 
     const logout = () => {
@@ -36,6 +41,10 @@ const AuthProvider = ({children}) => {
         setUser(null);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        try {
+            sessionStorage.removeItem('chat_selectedUser_v1');
+            sessionStorage.removeItem('chat_messages_v1');
+        } catch (e) {}
     };
 
     return (
