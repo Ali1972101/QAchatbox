@@ -22,6 +22,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
     },
+      avatarUrl: {
+        type: String,
+        default: "",
+      },
+      statusText: {
+        type: String,
+        default: "",
+        maxlength: 280,
+      },
+      statusImageUrl: {
+        type: String,
+        default: "",
+      },
     
   },
   { timestamps: true }

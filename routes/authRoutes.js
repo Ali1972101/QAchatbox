@@ -2,16 +2,17 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const express = require("express");
+const authenticateToken = require("../middleware/authMiddleware");
 const router = express.Router();
 
 const handleSignup = async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        if (!name || !email || !password) {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-     const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
@@ -21,12 +22,12 @@ const handleSignup = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-    }); 
+    });
 
     const token = jwt.sign(
       { userId: newUser._id, email: newUser.email },
       process.env.JWT_SECRET || "secret",
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     return res.status(201).json({
@@ -39,8 +40,16 @@ const handleSignup = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    console.error("Signup error:", error);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue || {})[0] || "field";
+      return res.status(409).json({ message: `${field} already exists` });
+    }
+    return res.status(500).json({ message: error.message || "Server error" });
   }
 };
 
@@ -63,7 +72,7 @@ const handleLogin = async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET || "secret",
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     return res.status(200).json({
@@ -76,12 +85,67 @@ const handleLogin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    console.error("Login error:", error);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).json({ message: error.message || "Server error" });
   }
 };
 
-router.post(["/Login", "/login", "/Signin", "/signin"], handleLogin);
+router.post(["/Login", "/login"], handleLogin);
 
+router.get("/me", authenticateToken, async (req, res) => {
+
+    try {
+
+        const user = await User.findById(req.user.userId)
+            .select("-password");
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        res.json(user);
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: "Server error"
+        });
+
+    }
+
+});
+
+
+
+router.get("/users", authenticateToken, async (req, res) => {
+
+    try {
+
+        const users = await User.find({
+          _id: {
+            $ne: req.user.userId
+          }
+        })
+        .select("-password")
+        .sort({ name: 1 });
+
+        res.json(users);
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: "Server error"
+        });
+
+    }
+
+});
 
 module.exports = router;

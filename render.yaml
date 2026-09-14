@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: qa-backend
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    autoDeploy: true
+    envVars:
+      - key: MONGODB_URI
+        scope: PRIVATE
+      - key: JWT_SECRET
+        scope: PRIVATE
+      - key: FRONTEND_URL
+        scope: PRIVATE
