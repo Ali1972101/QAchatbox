@@ -1,4 +1,4 @@
-/* Container & Layout */
+
 .mobile-screen-wrapper {
   background-color: #000E08;
   min-height: 100vh;
@@ -21,7 +21,7 @@
   overflow: hidden;
 }
 
-/* Status Bar */
+
 .status-bar {
   display: flex;
   justify-content: space-between;
@@ -42,7 +42,7 @@
   gap: 6px;
 }
 
-/* Header */
+
 .message-header {
   display: flex;
   justify-content: space-between;
@@ -89,7 +89,6 @@
   object-fit: cover;
 }
 
-/* Stories / Status Bar */
 .stories-section {
   padding-bottom: 24px;
   width: 100%;
@@ -101,12 +100,12 @@
   gap: 18px;
   overflow-x: auto;
   padding: 0 24px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
 }
 
 .stories-scroll::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none; 
 }
 
 .story-item {
@@ -174,7 +173,7 @@
   letter-spacing: -0.2px;
 }
 
-/* Chat Main White Panel */
+
 .chat-drawer-panel {
   background-color: #ffffff;
   border-radius: 40px 40px 0 0;
@@ -194,7 +193,7 @@
   margin: 4px auto 20px;
 }
 
-/* Chat List */
+
 .chat-list {
   display: flex;
   flex-direction: column;
@@ -263,7 +262,7 @@
   background-color: #9ca3af;
 }
 
-/* Chat Info */
+
 .chat-info {
   flex: 1;
   overflow: hidden;
@@ -287,7 +286,7 @@
   text-overflow: ellipsis;
 }
 
-/* Chat Meta */
+
 .chat-meta {
   display: flex;
   flex-direction: column;
@@ -317,7 +316,6 @@
   box-sizing: border-box;
 }
 
-/* Bottom Navigation Bar */
 .bottom-nav-bar {
   position: sticky;
   bottom: 0;
@@ -364,7 +362,7 @@
   font-weight: 600;
 }
 
-/* Messages area */
+
 .chat-window {
   margin-top: 12px;
 }
@@ -386,7 +384,7 @@
   word-break: break-word;
 }
 
-/* Messages sent by the current user (sender) — show on the left */
+
 .message.outgoing {
   align-self: flex-start;
   background-color: #f3f4f6;
@@ -394,7 +392,7 @@
   border-top-left-radius: 6px;
 }
 
-/* Messages received (others) — show on the right */
+
 .message.incoming {
   align-self: flex-end;
   background-color: #24786d;
@@ -407,7 +405,7 @@
   border-radius: 8px;
 }
 
-/* Message input: full-width, prominent send button */
+
 .message-input {
   position: sticky;
   bottom: 0;
@@ -455,7 +453,7 @@
   transform: translateY(1px);
 }
 
-/* ensure message list doesn't hide behind the sticky input */
+
 .messages-list {
   padding-bottom: 96px;
 }

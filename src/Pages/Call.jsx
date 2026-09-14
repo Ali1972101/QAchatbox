@@ -104,11 +104,11 @@ export default function Call() {
 
           <h2 className="recent-section-title">Recent</h2>
 
-          {/* Call List */}
+          
           <div className="calls-list">
               {recentCalls.map((call, idx) => (
                 <div className="call-item" key={call.id || idx}>
-                {/* Avatar */}
+               
                 <div className="call-avatar-container">
                   {call.isGroup ? (
                     <div className="group-avatar-grid">

@@ -30,8 +30,6 @@ const Profile = () => {
         setLoading(false);
         return;
       }
-
-      // try new endpoint
       let res = await fetch('http://localhost:5000/api/users/upload-image', {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}` },
@@ -40,7 +38,6 @@ const Profile = () => {
       let data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // fallback to legacy
         res = await fetch('http://localhost:5000/api/users/upload-avatar', {
           method: 'POST',
           headers: { Authorization: `Bearer ${authToken}` },

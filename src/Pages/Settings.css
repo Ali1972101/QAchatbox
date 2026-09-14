@@ -1,4 +1,4 @@
-/* Container & Layout */
+
 .mobile-screen-wrapper {
   background-color: #000e08;
   min-height: 100vh;
@@ -21,7 +21,7 @@
   overflow: hidden;
 }
 
-/* Status Bar */
+
 .status-bar {
   display: flex;
   justify-content: space-between;
@@ -42,7 +42,7 @@
   gap: 6px;
 }
 
-/* Top Header */
+
 .top-header {
   display: flex;
   align-items: center;
@@ -71,7 +71,7 @@
   padding: 4px;
 }
 
-/* White Drawer Card */
+
 .settings-card {
   background-color: #ffffff;
   border-radius: 40px 40px 0 0;
@@ -92,7 +92,7 @@
   margin: 4px auto 16px;
 }
 
-/* Profile Section */
+
 .profile-section {
   display: flex;
   align-items: center;
@@ -160,7 +160,7 @@
   padding: 4px;
 }
 
-/* Menu List */
+
 .menu-list {
   display: flex;
   flex-direction: column;

@@ -43,20 +43,18 @@ export default function Message() {
     s.on('connect', () => console.log('socket connected'));
 
     s.on('private_message', (msg) => {
-      // append message and persist
       setMessages((prev) => {
         const next = [...prev, msg];
         try { sessionStorage.setItem(STORAGE_MESSAGES, JSON.stringify(next)); } catch (e) {}
         return next;
       });
 
-      // ensure sender appears in users list
+  
       const senderId = msg.sender || msg.from || msg.fromId;
       if (senderId) {
-        // try to fetch sender details from backend if we don't already have them
+        
         setUsers((prev) => {
-          if (prev.some(u => u._id === senderId)) return prev;
-          // add a temporary placeholder while we fetch the real data
+          if (prev.some(u => u._id === senderId)) return prev
           const temp = { _id: senderId, name: '', imageUrl: null, statusText: '' };
           return [temp, ...prev];
         });
@@ -68,12 +66,12 @@ export default function Message() {
             if (res.ok) {
               const userData = await res.json();
               setUsers((prev) => {
-                // replace placeholder with fetched data
+              
                 const filtered = prev.filter(u => u._id !== senderId);
                 return [{ _id: userData._id || userData.id, name: userData.name, imageUrl: userData.avatarUrl || userData.imageUrl || null, statusText: userData.statusText || '' }, ...filtered];
               });
 
-              // auto-open chat only when no chat is currently selected
+              
               setSelectedUser((cur) => {
                 if (!cur) {
                   try { sessionStorage.setItem(STORAGE_SELECTED, JSON.stringify({ _id: userData._id || userData.id, name: userData.name })); } catch (e) {}
@@ -82,7 +80,7 @@ export default function Message() {
                 return cur;
               });
             } else {
-              // if fetch failed, keep the temporary entry with a generic name
+              
               setUsers((prev) => prev.map(u => u._id === senderId ? { ...u, name: 'Unknown user' } : u));
             }
           } catch (e) {
@@ -106,7 +104,7 @@ export default function Message() {
       openChat(u);
       return;
     }
-    // restore cached state
+    
     try {
       const storedSel = sessionStorage.getItem(STORAGE_SELECTED);
       const storedMsgs = sessionStorage.getItem(STORAGE_MESSAGES);
@@ -114,16 +112,16 @@ export default function Message() {
       if (storedMsgs) {
         try { parsedMsgs = JSON.parse(storedMsgs); setMessages(parsedMsgs); } catch (e) { parsedMsgs = []; }
       }
-      // only restore previously selected chat if there is message history for it
+      
       if (storedSel) {
         try {
           const sel = JSON.parse(storedSel);
           const selId = sel._id || sel.id;
           const hasHistory = parsedMsgs && parsedMsgs.some(m => (m.sender === selId) || (m.receiver === selId));
           if (hasHistory) setSelectedUser(sel);
-        } catch (e) { /* ignore invalid stored selection */ }
+        } catch (e) 
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) 
   }, [location]);
 
   const openChat = async (u) => {
@@ -150,7 +148,7 @@ export default function Message() {
     const tempId = `local-${Date.now()}`;
     const localMsg = { _id: tempId, sender: user?._id || user?.id, receiver: toId, message: input, createdAt: new Date().toISOString(), status: 'sending' };
 
-    // optimistic UI update
+   
     setMessages((prev) => {
       const next = [...prev, localMsg];
       try { sessionStorage.setItem(STORAGE_MESSAGES, JSON.stringify(next)); } catch (e) {}
@@ -161,10 +159,9 @@ export default function Message() {
     const socket = socketRef.current;
     if (socket && socket.connected) {
       socket.emit('private_message', { to: toId, content: localMsg.message, _tempId: tempId });
-      // best-effort mark as sent
+
       setMessages((prev) => prev.map(m => m._id === tempId ? { ...m, status: 'sent' } : m));
     } else {
-      // fallback to HTTP persist — try several possible endpoints for compatibility
       const endpoints = ['/api/messages', '/api/message', '/api/messages/send', '/api/message/send'];
       const t = token || localStorage.getItem('token');
       let delivered = false;
@@ -194,7 +191,7 @@ export default function Message() {
     }
   };
 
-  // helper to show users (dedupe)
+  
   const renderUsers = () => {
     const seen = new Set();
     return users.filter(u => {

@@ -68,8 +68,6 @@ export default function Settings() {
         setLoading(false);
         return;
       }
-
-      // try the new endpoint first
       let res = await fetch('http://localhost:5000/api/users/upload-image', {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}` },
@@ -78,7 +76,7 @@ export default function Settings() {
       let data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // fallback to legacy endpoint
+       
         res = await fetch('http://localhost:5000/api/users/upload-avatar', {
           method: 'POST',
           headers: { Authorization: `Bearer ${authToken}` },
