@@ -21,7 +21,8 @@ export default function SignUp() {
   const isNameValid = name.trim().length >= 3;
   const isEmailValid = /\S+@\S+\.\S+/.test(email.trim());
   const isPasswordValid = password.length >= 6;
-  const isFormValid = isNameValid && isEmailValid && isPasswordValid && passwordsMatch;
+  const isFormValid =
+    isNameValid && isEmailValid && isPasswordValid && passwordsMatch;
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -32,9 +33,12 @@ export default function SignUp() {
 
     setMessage(null);
     setLoading(true);
-    const payload = { name: name.trim(), email: email.trim().toLowerCase(), password };
+    const payload = {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+    };
 
-    
     const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
     try {
@@ -47,13 +51,16 @@ export default function SignUp() {
       const resinfo = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        setMessage({ type: "success", text: "Signup successful! Redirecting..." });
-        
+        setMessage({
+          type: "success",
+          text: "Signup successful! Redirecting...",
+        });
+
         if (resinfo.token && typeof auth?.login === "function") {
           auth.login(resinfo.token, resinfo.user);
           setTimeout(() => navigate("/message"), 800);
         } else {
-          setTimeout(() => navigate("/login"), 800); 
+          setTimeout(() => navigate("/login"), 800);
         }
       } else {
         console.warn("Signup failed", response.status, resinfo);
@@ -112,6 +119,7 @@ export default function SignUp() {
           <input
             type="text"
             name="name"
+            placeholder="queen ali"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -122,6 +130,7 @@ export default function SignUp() {
           <label>Your email</label>
           <input
             type="email"
+            placeholder="qa@gmail.com"
             name="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

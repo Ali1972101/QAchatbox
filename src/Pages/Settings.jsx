@@ -10,13 +10,12 @@ import {
   Users,
   QrCode,
   Plus,
-  Wifi,
-  Battery,
-  Signal,
+  LogOut,
 } from "lucide-react";
 import "./Settings.css";
 import BottomNav from "../Components/BottomNav";
 import { useAuth } from "../../hooks/useAuth.jsx";
+import { disconnectSocket } from "../lib/socket";
 import blank from "../assets/Images/blank.png";
 
 const menuItems = [
@@ -46,13 +45,20 @@ const menuItems = [
     subtitle: "Network usage, storage usage",
   },
   { icon: <Users size={20} />, title: "Invite a friend", subtitle: "" },
+  {
+    icon: <LogOut size={20} />,
+    title: "Logout",
+    subtitle: "",
+    action: "logout",
+  },
 ];
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { user, token, setUser } = useAuth();
+  const { user, token, setUser, logout } = useAuth();
   const fileRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -97,12 +103,33 @@ export default function Settings() {
     } finally { setLoading(false); }
   };
 
+  const handleMenuItemClick = (item) => {
+    if (item.action === 'logout') {
+      setShowLogoutConfirm(true);
+    }
+  };
+
+  const confirmLogout = () => {
+    // Prefer whatever logout the auth hook provides; fall back to
+    // clearing the token/user manually if it doesn't expose one.
+    if (typeof logout === 'function') {
+      logout();
+    } else {
+      try { localStorage.removeItem('token'); } catch (e) {}
+      if (typeof setUser === 'function') setUser(null);
+    }
+    // Tear down the shared socket connection so no more messages/events
+    // are received under the old session.
+    disconnectSocket();
+    setShowLogoutConfirm(false);
+    navigate('/');
+  };
+
+  const cancelLogout = () => setShowLogoutConfirm(false);
+
   return (
     <div className="mobile-screen-wrapper">
       <div className="settings-page-container">
-        
-
-      
         <div className="top-header">
           <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
             <ArrowLeft size={22} color="white" />
@@ -110,11 +137,9 @@ export default function Settings() {
           <h1 className="header-title">Settings</h1>
         </div>
 
-     
         <div className="settings-card">
           <div className="drawer-handle-bar"></div>
 
-        
           <div className="profile-section">
             <div className="profile-img-wrapper">
               <img
@@ -138,10 +163,13 @@ export default function Settings() {
             </div>
           </div>
 
-          
           <div className="menu-list">
             {menuItems.map((item, i) => (
-              <button key={i} className="menu-item">
+              <button
+                key={i}
+                className="menu-item"
+                onClick={() => handleMenuItemClick(item)}
+              >
                 <div className="menu-icon">{item.icon}</div>
                 <div className="menu-text">
                   <h3>{item.title}</h3>
@@ -152,8 +180,71 @@ export default function Settings() {
           </div>
         </div>
 
-        
         <BottomNav activeTab="settings" />
+
+        {showLogoutConfirm && (
+          <div
+            className="logout-confirm-overlay"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 100,
+            }}
+            onClick={cancelLogout}
+          >
+            <div
+              className="logout-confirm-dialog"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: 'white',
+                borderRadius: 12,
+                padding: 24,
+                width: '80%',
+                maxWidth: 320,
+                textAlign: 'center',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+              }}
+            >
+              <p style={{ margin: '0 0 20px 0', fontSize: 16, color: '#111' }}>
+                Do you want to logout?
+              </p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <button
+                  onClick={cancelLogout}
+                  style={{
+                    flex: 1,
+                    padding: '10px 0',
+                    borderRadius: 8,
+                    border: '1px solid #ccc',
+                    background: 'white',
+                    color: '#333',
+                    cursor: 'pointer',
+                  }}
+                >
+                  No
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  style={{
+                    flex: 1,
+                    padding: '10px 0',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: '#e04b4b',
+                    color: 'white',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

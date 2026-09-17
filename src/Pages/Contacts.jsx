@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Contact.css";
 import BottomNav from "../Components/BottomNav";
 import blank from "../assets/Images/blank.png";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.jsx";
 import { useNavigate } from 'react-router-dom';
 
@@ -26,6 +26,8 @@ const Contacts = ({ onSelect }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef(null);
   const auth = useAuth();
   const navigate = useNavigate();
 
@@ -40,6 +42,13 @@ const Contacts = ({ onSelect }) => {
     }, 300);
     return () => clearTimeout(timer);
   }, [query]);
+
+  // Focus the input as soon as the search bar opens.
+  useEffect(() => {
+    if (searchOpen) {
+      searchInputRef.current?.focus();
+    }
+  }, [searchOpen]);
 
   const fetchUsers = async (q) => {
     setLoading(true);
@@ -65,43 +74,84 @@ const Contacts = ({ onSelect }) => {
     }
   };
 
+  const openSearch = () => setSearchOpen(true);
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setQuery("");
+    setResults([]);
+  };
+
   return (
     <div className="mobile-screen-wrapper">
       <div className="contacts-page-container">
         <div className="status-bar"></div>
 
         <div className="header">
-          <div className="search-box">
-            <Search size={18} color="white" />
-            <input placeholder="Search users" value={query} onChange={(e) => setQuery(e.target.value)} />
-          </div>
-          <h1 className="header-title">Contacts</h1>
-          <button className="header-icon-btn" aria-label="Add Contact">
-            <UserPlus size={18} color="white" />
-          </button>
+          {searchOpen ? (
+            <div className="search-box search-box-active" style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+              <Search size={18} color="white" />
+              <input
+                ref={searchInputRef}
+                placeholder="Search users"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Escape') closeSearch(); }}
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'white' }}
+              />
+              <button
+                className="header-icon-btn"
+                aria-label="Close search"
+                onClick={closeSearch}
+              >
+                <X size={18} color="white" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                className="header-icon-btn"
+                aria-label="Search"
+                onClick={openSearch}
+              >
+                <Search size={18} color="white" />
+              </button>
+              <h1 className="header-title">Contacts</h1>
+              <button className="header-icon-btn" aria-label="Add Contact">
+                <UserPlus size={18} color="white" />
+              </button>
+            </>
+          )}
         </div>
 
         <div className="content">
           <div className="drawer-handle-bar"></div>
-          <p className="my-contact-title">Search results</p>
 
-          {loading && <p>Searching...</p>}
-          {!loading && results.length === 0 && <p className="muted">No users</p>}
-          {(() => {
-            const seen = new Set();
-            const unique = results.filter((r) => {
-              const id = r._id || r.email || JSON.stringify(r);
-              if (seen.has(id)) return false;
-              seen.add(id);
-              return true;
-            });
-            return unique.map((user, idx) => (
-              <ContactItem key={user._id || user.email || idx} item={user} onClick={() => { 
-                if (onSelect) onSelect(user); 
-                navigate('/message', { state: { user } });
-              }} />
-            ));
-          })()}
+          {!searchOpen ? (
+            <p className="muted">Tap the search icon above to find people to message.</p>
+          ) : (
+            <>
+              <p className="my-contact-title">Search results</p>
+
+              {loading && <p>Searching...</p>}
+              {!loading && query.trim() && results.length === 0 && <p className="muted">No users</p>}
+              {(() => {
+                const seen = new Set();
+                const unique = results.filter((r) => {
+                  const id = r._id || r.email || JSON.stringify(r);
+                  if (seen.has(id)) return false;
+                  seen.add(id);
+                  return true;
+                });
+                return unique.map((user, idx) => (
+                  <ContactItem key={user._id || user.email || idx} item={user} onClick={() => {
+                    if (onSelect) onSelect(user);
+                    navigate('/message', { state: { user } });
+                  }} />
+                ));
+              })()}
+            </>
+          )}
         </div>
 
         <BottomNav activeTab="contacts" />

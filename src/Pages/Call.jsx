@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Call.css";
 import BottomNav from "../Components/BottomNav";
 import {
@@ -8,68 +8,51 @@ import {
   PhoneOutgoing,
   PhoneMissed,
   Video,
-  Wifi,
-  Battery,
-  Signal,
   PhoneCall,
 } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth.jsx";
+
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Call() {
-  const recentCalls = [
-    {
-      id: 1,
-      name: "Team Align",
-      time: "Today, 09:30 AM",
-      type: "incoming",
-      isGroup: true,
-      groupAvatars: [
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80",
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80",
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=80&q=80",
-      ],
-    },
-    {
-      id: 2,
-      name: "Jhon Abraham",
-      time: "Today, 07:30 AM",
-      type: "incoming",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
-      isGroup: false,
-    },
-    {
-      id: 3,
-      name: "Sabila Sayma",
-      time: "Yesterday, 07:35 PM",
-      type: "missed",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
-      isGroup: false,
-    },
-    {
-      id: 4,
-      name: "Alex Linderson",
-      time: "Monday, 09:30 AM",
-      type: "outgoing",
-      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80",
-      isGroup: false,
-    },
-    {
-      id: 5,
-      name: "Jhon Abraham",
-      time: "03/07/22, 07:30 AM",
-      type: "missed",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
-      isGroup: false,
-    },
-    {
-      id: 6,
-      name: "John Borino",
-      time: "Monday, 09:30 AM",
-      type: "outgoing",
-      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80",
-      isGroup: false,
-    },
-  ];
+  const [recentCalls, setRecentCalls] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { token } = useAuth();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchCalls = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const t = token || localStorage.getItem("token");
+        const res = await fetch(`${BASE}/api/calls`, {
+          headers: t ? { Authorization: `Bearer ${t}` } : {},
+        });
+        if (!res.ok) {
+          // Endpoint may not exist yet on the backend — treat as "no calls"
+          // rather than throwing, so the UI still renders cleanly.
+          if (!cancelled) setRecentCalls([]);
+          return;
+        }
+        const data = await res.json().catch(() => []);
+        if (!cancelled) setRecentCalls(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.warn("Could not load calls", err?.message || err);
+        if (!cancelled) {
+          setError("Could not load recent calls.");
+          setRecentCalls([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchCalls();
+    return () => { cancelled = true; };
+  }, [token]);
 
   const renderCallIcon = (type) => {
     if (type === "incoming") {
@@ -84,9 +67,6 @@ export default function Call() {
   return (
     <div className="mobile-screen-wrapper">
       <div className="call-page-container">
-       
-
-        
         <header className="call-header">
           <button className="header-icon-btn" aria-label="Search">
             <Search size={18} color="white" />
@@ -97,26 +77,28 @@ export default function Call() {
           </button>
         </header>
 
-        
         <main className="call-drawer-panel">
-          
           <div className="drawer-handle-bar"></div>
 
           <h2 className="recent-section-title">Recent</h2>
 
-          {/* Call List */}
           <div className="calls-list">
-              {recentCalls.map((call, idx) => (
-                <div className="call-item" key={call.id || idx}>
-                {/* Avatar */}
+            {loading && <p className="muted">Loading calls...</p>}
+            {!loading && error && <p className="muted">{error}</p>}
+            {!loading && !error && recentCalls.length === 0 && (
+              <p className="muted">No recent calls yet.</p>
+            )}
+
+            {!loading && !error && recentCalls.map((call, idx) => (
+              <div className="call-item" key={call.id || call._id || idx}>
                 <div className="call-avatar-container">
                   {call.isGroup ? (
                     <div className="group-avatar-grid">
-                      {call.groupAvatars.map((imgUrl, gidx) => (
+                      {(call.groupAvatars || []).map((imgUrl, gidx) => (
                         <img key={gidx} src={imgUrl} alt="Group member" />
                       ))}
                     </div>
-                    ) : (
+                  ) : (
                     <img
                       src={call.image}
                       alt={call.name}
@@ -125,7 +107,6 @@ export default function Call() {
                   )}
                 </div>
 
-              
                 <div className="call-info">
                   <h3 className="call-name">{call.name}</h3>
                   <div className="call-meta-row">
@@ -134,7 +115,6 @@ export default function Call() {
                   </div>
                 </div>
 
-                
                 <div className="call-action-btns">
                   <button className="action-btn" aria-label="Audio Call">
                     <Phone size={20} color="#797C7B" />
@@ -148,7 +128,6 @@ export default function Call() {
           </div>
         </main>
 
-        
         <BottomNav activeTab="calls" />
       </div>
     </div>
